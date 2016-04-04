@@ -1,0 +1,71 @@
+##  General info about MetaAlign
+
+* Metaalign requires a C++ compiler (tested with GNU compiler).
+
+* Metaalign uses HMMoC (developed by George Lunter) for execution. The version
+of HMMoC used by Metalign is hmmoc-1.3 (free to download).
+
+* The ../XML-source folder contains FullModel_Nov24.xml, which can be used
+as input to HMMoC to generate source files (.h & .cc). This release contains
+these sources. Generally this is a time consuming process.
+
+* The ../testseq folder contains sample sequences which can be used as a basis
+to create new sequence. These sequences are in FASTQ format.
+
+* A Makefile is provided to build the software, Make Metaalign will build the entire
+code, build is a time consuming process. An executable (located under ../binaries) is 
+packaged with this release and can be used out of the box.  
+
+* Typical metaalign comparison for 200 X 200 sequence is about 30 mins and is
+very likely to be machine dependent.
+
+* This code does not support any form of parallelism.
+
+* This software has not be tested on Windows.
+
+
+Input Files:
+params.txt: Is an input file used by metaalign, it takes an 3 inputs,
+            QParam  : Rate at which the quality value needs to be reduced.
+            QMin    : Minimum quality value, no reduction beyond this value.
+            Q_N     : Order (Linear, quadratic) of reduction.
+                     Not supported in this release.
+           
+Codon2Prot.txt: An input file which provides a direct map between Codons and proteins.
+                The information in this file is very general and is stored in a specific
+                format.
+
+query.fastq, sub.fastq : Subject sequence and Query sequence in FASTQ format. Look under 
+                         ../testseq for a sample sequences. In FASTQ format the quality
+                         values are stored as ASCI charecters.
+
+
+Runtime options:
+
+Additional information:
+
+HMMoC XML Generator (../scripts/XMLGenerator)
+The XML files for HMMoC are generated using following input,
+Blossum62 (stored in blosum62.qij) is used to compute the various target frequencies. 
+CFU.txt contains information on Codon usage frequency used by Metaalign. Please refer to the paper 
+to see how these are used in computing final probabilities (especially for DEGENERATIVE model). 
+
+../XML-source
+FullModel_OLD.xml contains the original proposed model with 3721 states, which we found
+to be computationally unfeasable to use. On the other hand FullModel_Nov24.xml contains
+the final degenerative model.
+
+Real Sequence used for comparison
+
+
+
+Analysis of impact of quality value on alignment,
+The 45 sequences used for testing and corresponding tables can be found under, 
+
+
+
+
+
+
+
+

@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+
+<hml debug="no">
+
+<author> Kentaro Tomii </author>
+
+<alphabet id="nucleotides">
+ ACGT
+</alphabet>
+
+<output id="sequence1">
+ <alphabet idref="nucleotides"/>
+ <identifier type="sequence" value="iSequence1"/>
+ <identifier type="length" value="iLen1"/>
+ <code type="parameter">
+  <![CDATA[
+     vector<char>& iSequence1
+  ]]>
+ </code>
+</output>
+
+<output id="sequence2">
+ <alphabet idref="nucleotides"/>
+ <identifier type="sequence" value="iSequence2"/>
+ <identifier type="length" value="iLen2"/>
+ <code type="parameter">
+  <![CDATA[
+     vector<char>& iSequence2
+  ]]>
+ </code>
+</output>
+
+<code id="emitheader" where="includes"> #include "emit.h" </code>
+
+<code id="initialise1" type="statement" init="emitheader">
+  <!-- Actual initialisation block -->
+  <![CDATA[
+  int iLen1 = iSequence1.size();   // The sequence lengths are not passed as parameters, but are
+  int iLen2 = iSequence2.size();   // computed from the vector<char> itself
+  ]]>
+
+  <code type="parameter"> double iDel  </code>   <!-- deletion probability of the reads ') -->
+  <code type="parameter"> double iIns  </code>   <!-- insertion probability of the reads ') -->
+
+  <code type="parameter">
+   <![CDATA[
+      vector<double>& iQscores1
+   ]]>
+  </code>
+  <code type="parameter">
+   <![CDATA[
+      vector<double>& iQscores2
+   ]]>
+  </code>
+
+</code>
+
+
+
+<hmm id="Align">
+ <description>  Simple probabilistic pairwise sequence aligner  </description>
+
+ <outputs id="outputs">
+  <!-- Define number of emissions and their ordering -->
+  <output idref="sequence1"/>
+  <output idref="sequence2"/>
+ </outputs>
+ 
+ <clique id  = "block0"> 
+ <state id="Begin" emission = "empty"/>  
+ <state id="InterB" emission = "empty"/>
+ <state id="RandomBX" emission = "emitXgap"/>
+ <state id="RandomBY" emission = "emitgapX"/> 
+ 
+ </clique>
+
+ <clique id="block1">
+  <!-- New States introduced for Local Alignment -->      
+  <state id="Start"/>
+  
+ </clique>
+
+ <clique id="block2">  
+
+  <state id="prematch" emission="empty"/>
+  <state id="match"    emission="emitNN"/>
+
+  <state id="preinsert" emission="empty"/>
+  <state id="insert"    emission="emitNgap"/>
+
+  <state id="predelete" emission="empty"/>
+  <state id="delete"    emission="emitgapN"/>    
+
+  
+ </clique>
+
+ <clique id="block3">
+  <state id="End" emission="empty"/>
+ </clique>
+ 
+  <clique id  = "block4">
+ 
+ <state id="Finish" emission = "empty"/>  
+ <state id="InterE" emission = "empty"/>
+ <state id="RandomEX" emission = "emitXgap"/>
+ <state id="RandomEY" emission = "emitgapX"/>
+ 
+ 
+ </clique>
+
+
+ <graph>
+  <clique idref="block0"/>
+  <clique idref="block1"/>
+  <clique idref="block2"/>
+  <clique idref="block3"/>
+  <clique idref="block4"/>
+ </graph>
+
+
+ <emission id="empty">
+  <probability><code type="expression"> 1.0 </code></probability>
+ </emission>
+
+ <emission id="emitXgap">
+   <output idref="sequence1"/>
+    <probability>
+     <code type="statement" init="initialise1">
+     <identifier output="sequence1"> iSymb1 </identifier>
+     <identifier type="result" value="iResult"/>
+     <![CDATA[
+	  
+	    iResult = 1-iQscores1[iPos0];
+		
+     ]]>
+     </code>
+    </probability>
+ </emission>
+ 
+ <emission id="emitgapX">
+   <output idref="sequence2"/>
+    <probability>
+     <code type="statement" init="initialise1">
+     <identifier output="sequence2"> iSymb2 </identifier>
+     <identifier type="result" value="iResult"/>
+     <![CDATA[
+	 
+        iResult = 1-iQscores2[iPos1]/3;
+     
+     ]]>
+     </code>
+    </probability>
+ </emission>
+ 
+  <emission id="emitNN">
+  <output idref="sequence1"/>
+  <output idref="sequence2"/>
+   <probability>
+    <code type="statement" init="initialise1">
+    <identifier output="sequence1"> iSymb1 </identifier>
+    <identifier output="sequence2"> iSymb2 </identifier>
+    <identifier type="result" value="iResult"/>
+	
+	<!-- Need to Introduce Quality Values -->
+	
+	<![CDATA[	
+	
+	iResult = 0.0;
+
+    iResult += 0.050443388*emitXX('A','C',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.077559493*emitXX('C','C',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.074547929*emitXX('A','G',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.036211968*emitXX('T','G',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.03844037*emitXX('A','T',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.027099184*emitXX('T','C',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.124464442*emitXX('A','A',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.0745479290000001*emitXX('G','A',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.0803839059999999*emitXX('T','T',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.028618357*emitXX('C','T',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.176740665*emitXX('G','G',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.041527015*emitXX('C','G',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.03844037*emitXX('T','A',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.041527015*emitXX('G','C',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.050443388*emitXX('C','A',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+    iResult += 0.036211968*emitXX('G','T',iSymb1,iSymb2,iQscores1[iPos0],iQscores2[iPos1]);
+	
+	
+	
+    ]]>
+    </code>
+   </probability>
+ </emission>
+  
+  <emission id="emitgapN">
+   <output idref="sequence2"/>
+    <probability>
+     <code type="statement" init="initialise1">
+     <identifier output="sequence2"> iSymb2 </identifier>
+     <identifier type="result" value="iResult"/>
+     <![CDATA[
+	 
+     iResult = 0.0;
+     iResult += 0.2841*emitGapX('A',iSymb2,iQscores2[iPos1]);
+     iResult += 0.1792*emitGapX('T',iSymb2,iQscores2[iPos1]);
+     iResult += 0.2158*emitGapX('C',iSymb2,iQscores2[iPos1]);
+     iResult += 0.318*emitGapX('G',iSymb2,iQscores2[iPos1]);
+	 
+     ]]>
+     </code>
+    </probability>
+ </emission>
+ 
+  <emission id="emitNgap">
+   <output idref="sequence1"/>
+    <probability>
+     <code type="statement" init="initialise1">
+     <identifier output="sequence1"> iSymb1 </identifier>
+     <identifier type="result" value="iResult"/>
+     <![CDATA[
+	 
+	iResult = 0.0;
+    iResult += 0.2841*emitXGap('A',iSymb1,iQscores1[iPos0]);
+    iResult += 0.1792*emitXGap('T',iSymb1,iQscores1[iPos0]);
+    iResult += 0.2158*emitXGap('C',iSymb1,iQscores1[iPos0]);
+    iResult += 0.318*emitXGap('G',iSymb1,iQscores1[iPos0]);
+	
+     ]]>
+     </code>
+    </probability>
+ </emission>
+ 
+
+ 
+ <transitions>  
+  
+  <!-- PRE Local Alignment -->
+  <transition from="Begin" to="RandomBX"  probability="1_m_eta"/>  
+  <transition from="RandomBX" to="RandomBX"  probability="1_m_eta"/>
+  <transition from="RandomBX" to="InterB"  probability="eta"/>  
+  <transition from="Begin" to="InterB"  probability="eta"/>  
+  <transition from="InterB" to="Start"  probability="eta" emission = "empty"/>   
+  <transition from="InterB" to="RandomBY"  probability="1_m_eta"/> 
+  <transition from="RandomBY" to="RandomBY"  probability="1_m_eta"/>
+  <transition from="RandomBY" to="Start"  probability="eta" emission = "empty"/>  
+ 
+ 
+  <!-- INTERMEDIATE STATES -->
+  <transition from="Start" to="prematch"  probability="sta_mat"/>
+  <transition from="Start" to="preinsert" probability="sta_ins"/>
+  <transition from="Start" to="predelete" probability="sta_del"/>
+
+  <transition from="predelete" to="prematch" probability="del_mat"/>
+  <transition from="predelete" to="End"      probability="del_end"/>
+  <transition from="predelete" to="delete"   probability="del_del"/>
+
+  <transition from="preinsert" to="prematch" probability="ins_mat"/>
+  <transition from="preinsert" to="End"      probability="ins_end"/>
+  <transition from="preinsert" to="insert"   probability="ins_ins"/>
+
+  <transition from="prematch" to="match"     probability="mat_mat"/>
+  <transition from="prematch" to="End"       probability="mat_end"/>
+  <transition from="prematch" to="preinsert" probability="mat_ins"/>
+  <transition from="prematch" to="predelete" probability="mat_del"/>     
+  
+  <transition from="match" to="prematch" probability="states_mat"/>  
+  <transition from="insert" to="preinsert" probability="states_mat"/>  
+  <transition from="delete" to="predelete" probability="states_mat"/>   
+  
+  
+  <!-- POST Local Alignment -->
+  <transition from="End" to="RandomEX"  probability="1_m_eta"/>  
+  <transition from="End" to="InterE"  probability="eta"/>    
+  <transition from="RandomEX" to="RandomEX"  probability="1_m_eta"/>
+  <transition from="RandomEX" to="InterE"  probability="eta"/>    
+  <transition from="InterE" to="Finish"  probability="eta"/>   
+  <transition from="InterE" to="RandomEY"  probability="1_m_eta"/>   
+  <transition from="RandomEY" to="RandomEY"  probability="1_m_eta"/>
+  <transition from="RandomEY" to="Finish"  probability="eta"/>  
+  
+  
+ </transitions> 
+ 
+ 
+ <probability id="states_mat"><code type="expression"> 1.00 </code></probability>
+ 
+ 
+ <probability id="sta_mat"><code type="expression"> 0.8 </code></probability>
+ <probability id="sta_ins"><code type="expression"> 0.1 </code></probability>
+ <probability id="sta_del"><code type="expression"> 0.1 </code></probability>
+
+ <probability id="del_mat"><code type="expression"> 0.49 </code></probability>
+ <probability id="del_end"><code type="expression"> 0.02 </code></probability>
+ <probability id="del_del"><code type="expression"> 0.49 </code></probability>
+
+ <probability id="ins_mat"><code type="expression"> 0.49 </code></probability>
+ <probability id="ins_end"><code type="expression"> 0.02 </code></probability>
+ <probability id="ins_ins"><code type="expression"> 0.49 </code></probability>
+
+ <probability id="mat_mat"><code type="expression"> 0.58 </code></probability>
+ <probability id="mat_end"><code type="expression"> 0.02 </code></probability>
+ <probability id="mat_ins"><code type="expression"> 0.2 </code></probability>
+ <probability id="mat_del"><code type="expression"> 0.2 </code></probability>   
+ 
+ <probability id="eta"><code type="expression"> 0.9  </code></probability>
+ <probability id="1_m_eta"><code type="expression"> 0.1  </code></probability>
+ 
+ 
+ 
+  
+  
+</hmm>
+
+
+<!-- Code generation -->
+
+<viterbi name="Viterbi" id="vit">
+  <hmm idref="Align"/>
+</viterbi>
+
+<codeGeneration realtype="bfloat" file="NucModel.cc" header="NucModel.h" language="C++">
+  <viterbi idref="vit"/>
+</codeGeneration>
+
+</hml>
