@@ -116,6 +116,6 @@ int main(int argc, char** argv)
   Quality2Error(qSeq1_t,iErr1_t);
   Quality2Error(qSeq2_t,iErr2_t)  ;
     
-  //execute<NoBanding>( pars, iSeq1, iSeq2, iErr1_s, iErr1_t, iErr2_s, iErr2_t);
+  execute<NoBanding>( pars, iSeq1, iSeq2, iErr1_s, iErr1_t, iErr2_s, iErr2_t);
     
 }
