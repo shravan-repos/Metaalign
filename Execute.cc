@@ -34,8 +34,9 @@
 #include <time.h> 
 #include "FullModel_Nov24.h"
 #include <stdlib.h>
+#include "PrintSeq.cc"
 #include <getopt.h>
-#include "Metaalign.h"
+//#include "Metaalign.h"
 
 // List of Global variables
 extern bool enableVerbose;
