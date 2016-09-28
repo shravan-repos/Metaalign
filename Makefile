@@ -23,9 +23,11 @@ Quality2Error.o:
 	g++ -c -O3 -ffast-math -finline-limit=10000 -Wall Quality2Error.cc
 Execute.o: 
 	g++ -c -O3 -ffast-math -finline-limit=10000 -Wall Execute.cc
+Align.o:
+	g++ -c -O3 -ffast-math -finline-limit=10000 -Wall Align.cpp
 FullModel_Nov24.o:
-	g++ -c -O3 -ffast-math -finline-limit=10000 -Wall FullModel_Nov24_reverse.cc FullModel_Nov24.h
-Metaalign: AdjustQ4HPRuns.o HandleNPositions.o  ReadArguments.o display_usage.o ReadParams.o ReadSeq.o ReadQ.o Quality2Error.o Execute.o  FullModel_Nov24.o
-	g++ -o $@ -lstdc++ -O3 -ffast-math -finline-limit=10000 -Wall Metaalign.cc AdjustQ4HPRuns.o HandleNPositions.o  ReadArguments.o display_usage.o ReadParams.o ReadSeq.o ReadQ.o Quality2Error.o Metaalign.h Execute.o FullModel_Nov24.o FullModel_Nov24.h
+	g++ -c -v -O3 -ffast-math -finline-limit=10000 -W -Wall FullModel_Nov24_reverse.cc FullModel_Nov24.h
+Metaalign: AdjustQ4HPRuns.o HandleNPositions.o  ReadArguments.o display_usage.o ReadParams.o ReadSeq.o ReadQ.o Quality2Error.o Execute.o Align.o FullModel_Nov24.o
+	g++ -o $@ -lstdc++ -O3 -ffast-math -finline-limit=10000 -Wall Metaalign.cc AdjustQ4HPRuns.o HandleNPositions.o  ReadArguments.o display_usage.o ReadParams.o ReadSeq.o ReadQ.o Quality2Error.o Metaalign.h Execute.o Align.o FullModel_Nov24.o FullModel_Nov24.h 
 clean: 
 	rm *.o
